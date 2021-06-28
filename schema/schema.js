@@ -1,6 +1,7 @@
 import axios from "axios";
 import {
     GraphQLInt,
+    GraphQLList,
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLString
@@ -8,16 +9,25 @@ import {
 
 const CompanyType = new GraphQLObjectType({
     name: "Company",
-    fields: {
+    fields: () => ({
         id: {type: GraphQLString},
         name: {type: GraphQLString},
-        description: {type: GraphQLString}
-    }
+        description: {type: GraphQLString},
+        users: {
+            type: new GraphQLList(UsertType),
+            async resolve(parentValue, _args) {
+                const response = await axios.get(
+                    `http://localhost:3000/companies/${parentValue.id}/users`
+                );
+                return response.data;
+            }
+        }
+    })
 });
 
 const UsertType = new GraphQLObjectType({
     name: "User",
-    fields: {
+    fields: () => ({
         id: {type: GraphQLString},
         firstName: {type: GraphQLString},
         age: {type: GraphQLInt},
@@ -30,7 +40,7 @@ const UsertType = new GraphQLObjectType({
                 return response.data;
             }
         }
-    }
+    })
 });
 
 const RootQuery = new GraphQLObjectType({
@@ -51,7 +61,7 @@ const RootQuery = new GraphQLObjectType({
             args: {id: {type: GraphQLString}},
             async resolve(_parentValue, args) {
                 const response = await axios.get(
-                    `http://localhost:3000/users/${args.id}`
+                    `http://localhost:3000/companies/${args.id}`
                 );
                 return response.data;
             }
