@@ -2,6 +2,7 @@ import axios from "axios";
 import {
     GraphQLInt,
     GraphQLList,
+    GraphQLNonNull,
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLString
@@ -14,7 +15,7 @@ const CompanyType = new GraphQLObjectType({
         name: {type: GraphQLString},
         description: {type: GraphQLString},
         users: {
-            type: new GraphQLList(UsertType),
+            type: new GraphQLList(UserType),
             async resolve(parentValue, _args) {
                 const response = await axios.get(
                     `http://localhost:3000/companies/${parentValue.id}/users`
@@ -25,7 +26,7 @@ const CompanyType = new GraphQLObjectType({
     })
 });
 
-const UsertType = new GraphQLObjectType({
+const UserType = new GraphQLObjectType({
     name: "User",
     fields: () => ({
         id: {type: GraphQLString},
@@ -47,7 +48,7 @@ const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",
     fields: {
         user: {
-            type: UsertType,
+            type: UserType,
             args: {id: {type: GraphQLString}},
             async resolve(_parentValue, args) {
                 const response = await axios.get(
@@ -69,6 +70,32 @@ const RootQuery = new GraphQLObjectType({
     }
 });
 
+const mutation = new GraphQLObjectType({
+    name: "Mutation",
+    fields: {
+        addUser: {
+            type: UserType,
+            args: {
+                firstName: {type: new GraphQLNonNull(GraphQLString)},
+                age: {type: new GraphQLNonNull(GraphQLInt)},
+                companyId: {type: GraphQLString}
+            },
+            async resolve(_parentValue, {firstName, age}) {
+                const response = await axios.post(
+                    "http://localhost:3000/users",
+                    {
+                        firstName,
+                        age
+                    }
+                );
+
+                return response.data;
+            }
+        }
+    }
+});
+
 export const schema = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation
 });
