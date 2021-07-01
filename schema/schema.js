@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import {
     GraphQLInt,
     GraphQLList,
@@ -87,6 +88,35 @@ const mutation = new GraphQLObjectType({
                         firstName,
                         age
                     }
+                );
+
+                return response.data;
+            }
+        },
+        deleteUser: {
+            type: UserType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLString)}
+            },
+            async resolve(_parentValue, {id}) {
+                const response = await axios.delete(
+                    `http://localhost:3000/users/${id}`
+                );
+
+                return response.data;
+            }
+        },
+        editUser: {
+            type: UserType,
+            args: {
+                id: {type: new GraphQLNonNull(GraphQLString)},
+                firstName: {type: GraphQLString},
+                age: {type: GraphQLString}
+            },
+            async resolve(_parentValue, args) {
+                const response = await axios.patch(
+                    `http://localhost:3000/users/${args.id}`,
+                    args
                 );
 
                 return response.data;

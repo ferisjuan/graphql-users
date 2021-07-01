@@ -3,7 +3,7 @@
     {
       "id": "23",
       "firstName": "Juan",
-      "age": 43,
+      "age": "42",
       "companyId": "1"
     },
     {
